@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlanVibe Lanka • Event Planner Studio</title>
+  <meta name="description" content="Personal event planning suite tailored for Sri Lankan Poruwa weddings, corporate galas, homecomings, parties, and ceremonies. Currency in LKR (Rs.).">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Confetti Canvas for celebrations -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- Notification Toast Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-group" onclick="app.showDashboard()" role="button" tabindex="0">
+        <div class="brand-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">PlanVibe Lanka</span>
+          <span class="brand-tag">Sri Lanka Event Planner 🇱🇰</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="nav-links">
+        <button class="nav-btn active" id="navDashboard" onclick="app.showDashboard()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Events Dashboard
+        </button>
+        <button class="nav-btn" id="navCalendar" onclick="app.showCalendarView()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          Calendar
+        </button>
+        <button class="nav-btn" id="navBudget" onclick="app.showGlobalBudgetView()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          Budget (LKR)
+        </button>
+      </nav>
+
+      <!-- Header Actions -->
+      <div class="header-actions">
+        <!-- Currency Pill Indicator -->
+        <span class="currency-indicator-pill" title="Currency standard: Sri Lankan Rupee (LKR)">
+          🇱🇰 LKR (Rs.)
+        </span>
+
+        <!-- Dark/Light Mode Toggle -->
+        <button class="btn-icon" id="themeToggleBtn" onclick="app.toggleTheme()" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+
+        <!-- Profile & Settings Button -->
+        <button class="profile-header-btn" onclick="app.openProfileModal()" title="My Planner Profile & Settings">
+          <div class="profile-avatar" id="headerProfileAvatar">LK</div>
+          <div class="profile-info-mini">
+            <span class="profile-name-mini" id="headerProfileName">My Profile</span>
+            <span class="profile-role-mini">Planner Settings ⚙️</span>
+          </div>
+        </button>
+
+        <button class="btn btn-primary" onclick="app.openNewEventModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>+ Add New Event</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Body -->
+  <main class="app-main">
+    
+    <!-- ============================================== -->
+    <!-- VIEW 1: DASHBOARD / EVENTS LIST                -->
+    <!-- ============================================== -->
+    <section id="viewDashboard" class="app-view active">
+      
+      <!-- Welcome Banner / Highlight -->
+      <div class="hero-welcome">
+        <div class="welcome-text">
+          <h1 class="welcome-title">Ayubowan, <span id="welcomePlannerName">Planner</span>! 🪷</h1>
+          <p class="welcome-subtitle">Plan and direct Poruwa weddings, homecomings, corporate banquets, beach celebrations, and Pirith ceremonies across Sri Lanka.</p>
+        </div>
+        <div class="quick-counter-pill" id="nextEventBanner">
+          <!-- Populated dynamically with countdown to nearest event -->
+        </div>
+      </div>
+
+      <!-- Quick Metrics Strip (All in LKR) -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon color-blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+          <div class="metric-info">
+            <span class="metric-label">Active Events</span>
+            <span class="metric-value" id="statTotalEvents">0</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon color-emerald">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+          <div class="metric-info">
+            <span class="metric-label">Tasks Completed</span>
+            <span class="metric-value" id="statCompletedTasks">0 / 0</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon color-purple">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+          <div class="metric-info">
+            <span class="metric-label">Confirmed Guests</span>
+            <span class="metric-value" id="statConfirmedGuests">0</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon color-amber">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          </div>
+          <div class="metric-info">
+            <span class="metric-label">Total Expenses (LKR)</span>
+            <span class="metric-value" id="statBudgetSpent">Rs. 0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls: Search & Sri Lankan Category Filter Bar -->
+      <div class="filter-bar">
+        <div class="search-input-wrapper">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="eventSearchInput" placeholder="Search events by title, venue, client, or district..." oninput="app.filterEvents()">
+          <button class="clear-search-btn" id="clearSearchBtn" onclick="app.clearSearch()" title="Clear search">✕</button>
+        </div>
+
+        <div class="category-pills" id="categoryPillContainer">
+          <!-- Generated from CATEGORIES array -->
+        </div>
+
+        <div class="filter-dropdown-wrapper">
+          <select id="statusFilterSelect" onchange="app.filterEvents()" class="styled-select">
+            <option value="all">All Statuses</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Events Card Grid -->
+      <div class="events-grid-container">
+        <div class="section-subhead">
+          <h2 class="subhead-title">Managed Events in Sri Lanka (<span id="eventsCount">0</span>)</h2>
+          <div class="subhead-actions">
+            <button class="btn btn-sm btn-secondary" onclick="app.resetSampleData()" title="Reload authentic Sri Lankan sample events">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>
+              Restore LK Sample Events
+            </button>
+          </div>
+        </div>
+
+        <div class="cards-grid" id="eventsGrid">
+          <!-- Event Cards Rendered Here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="eventsEmptyState" class="empty-state hidden">
+          <div class="empty-icon">🪷</div>
+          <h3>No events found</h3>
+          <p>No events match your current filter. Click below to add a new event to your planner.</p>
+          <button class="btn btn-primary" onclick="app.openNewEventModal()">+ Add New Event</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- VIEW 2: INTERACTIVE EVENT PLANNER WORKSPACE    -->
+    <!-- ============================================== -->
+    <section id="viewPlanner" class="app-view">
+      
+      <!-- Top Workspace Navigation Bar -->
+      <div class="workspace-header">
+        <button class="btn btn-back" onclick="app.showDashboard()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          Back to Events Dashboard
+        </button>
+
+        <div class="workspace-actions">
+          <button class="btn btn-secondary btn-sm" onclick="app.openEditEventModal()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            Edit Event
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="app.printEventSummary()" title="Print day-of briefing sheet or save as PDF">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Print Planner Brief
+          </button>
+          <button class="btn btn-danger-soft btn-sm" onclick="app.confirmDeleteCurrentEvent()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <!-- Event Hero Banner -->
+      <div class="event-hero" id="plannerHero">
+        <div class="event-hero-content">
+          <div class="hero-top-badges">
+            <span class="category-badge" id="plannerCategoryBadge">Poruwa Wedding</span>
+            <span class="district-badge" id="plannerDistrictBadge">Colombo</span>
+            <span class="status-badge" id="plannerStatusBadge">In Progress</span>
+          </div>
+          <h1 class="hero-event-title" id="plannerTitle">Event Title</h1>
+          <p class="hero-event-desc" id="plannerDescription">Description goes here</p>
+
+          <div class="hero-meta-row">
+            <div class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span id="plannerDate">Date</span>
+            </div>
+            <div class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              <span id="plannerTime">Auspicious Time (Nekatha)</span>
+            </div>
+            <div class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              <span id="plannerVenue">Venue</span>
+            </div>
+            <div class="meta-item" id="plannerClientRow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              <span id="plannerClient">Client Details</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Countdown Widget -->
+        <div class="hero-countdown-box">
+          <span class="countdown-label">COUNTDOWN TO EVENT</span>
+          <div class="countdown-numbers" id="plannerCountdown">
+            <!-- Rendered: days, hours, mins, secs -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Planner Tab Navigation -->
+      <div class="planner-tabs-bar">
+        <button class="tab-btn active" data-tab="tabTasks" onclick="app.switchTab('tabTasks')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+          Checklist & Rituals (<span id="tabCountTasks">0</span>)
+        </button>
+        <button class="tab-btn" data-tab="tabGuests" onclick="app.switchTab('tabGuests')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          Guests & RSVPs (<span id="tabCountGuests">0</span>)
+        </button>
+        <button class="tab-btn" data-tab="tabBudget" onclick="app.switchTab('tabBudget')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          Budget & Payments (LKR)
+        </button>
+        <button class="tab-btn" data-tab="tabTimeline" onclick="app.switchTab('tabTimeline')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Day-of Schedule (<span id="tabCountTimeline">0</span>)
+        </button>
+        <button class="tab-btn" data-tab="tabVendors" onclick="app.switchTab('tabVendors')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg>
+          Vendors & Crew (<span id="tabCountVendors">0</span>)
+        </button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="planner-tab-content">
+        
+        <!-- ================= TAB 1: CHECKLIST & TASKS ================= -->
+        <div id="tabTasks" class="tab-pane active">
+          <div class="pane-header">
+            <div class="pane-title-group">
+              <h2 class="pane-title">Event Checklist & Sri Lankan Rituals</h2>
+              <p class="pane-desc">Track tasks leading up to the event day (Nekath auspicious timings, Poruwa, catering tasting, papare band, oil lamp).</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="app.openAddTaskModal()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              + Add Task
+            </button>
+          </div>
+
+          <!-- Progress summary card -->
+          <div class="progress-bar-card">
+            <div class="progress-text-row">
+              <span class="progress-title">Checklist Completion</span>
+              <span class="progress-ratio" id="taskProgressRatio">0 / 0 completed (0%)</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="taskProgressBar" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- Task List -->
+          <div class="task-list" id="taskListContainer">
+            <!-- Dynamically injected tasks -->
+          </div>
+        </div>
+
+        <!-- ================= TAB 2: GUESTS & RSVPS ================= -->
+        <div id="tabGuests" class="tab-pane">
+          <div class="pane-header">
+            <div class="pane-title-group">
+              <h2 class="pane-title">Guest List & RSVPs</h2>
+              <p class="pane-desc">Monitor attendees, plus-ones headcount, table numbers, and dietary preferences (Halal, Pure Veg, Non-Veg).</p>
+            </div>
+            <div class="pane-actions-group">
+              <button class="btn btn-secondary btn-sm" onclick="app.exportGuestsCSV()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Export CSV
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="app.openAddGuestModal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                + Add Guest
+              </button>
+            </div>
+          </div>
+
+          <!-- RSVP Stats Cards -->
+          <div class="rsvp-summary-strip">
+            <div class="rsvp-pill attending">
+              <span class="rsvp-pill-num" id="rsvpCountAttending">0</span>
+              <span class="rsvp-pill-label">Attending</span>
+            </div>
+            <div class="rsvp-pill awaiting">
+              <span class="rsvp-pill-num" id="rsvpCountAwaiting">0</span>
+              <span class="rsvp-pill-label">Awaiting Reply</span>
+            </div>
+            <div class="rsvp-pill declined">
+              <span class="rsvp-pill-num" id="rsvpCountDeclined">0</span>
+              <span class="rsvp-pill-label">Declined</span>
+            </div>
+            <div class="rsvp-pill total-headcount">
+              <span class="rsvp-pill-num" id="rsvpCountHeadcount">0</span>
+              <span class="rsvp-pill-label">Total Expected Guests (incl. +1s)</span>
+            </div>
+          </div>
+
+          <!-- Guest Table -->
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Guest Name</th>
+                  <th>Contact</th>
+                  <th>RSVP Status</th>
+                  <th>+1s</th>
+                  <th>Dietary & Table Notes</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="guestTableBody">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= TAB 3: BUDGET & EXPENSES ================= -->
+        <div id="tabBudget" class="tab-pane">
+          <div class="pane-header">
+            <div class="pane-title-group">
+              <h2 class="pane-title">Budget Tracker (Sri Lankan Rupees - LKR)</h2>
+              <p class="pane-desc">Track venue advances, decor craft, catering per-head costs, and band/DJ payments in Rs.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="app.openAddExpenseModal()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              + Add Expense (Rs.)
+            </button>
+          </div>
+
+          <!-- Budget Overview Cards (LKR) -->
+          <div class="budget-summary-strip">
+            <div class="budget-metric-card">
+              <span class="b-label">Total Allocated Budget</span>
+              <span class="b-val" id="eventTotalBudget">Rs. 0</span>
+            </div>
+            <div class="budget-metric-card">
+              <span class="b-label">Paid / Booked Expenses</span>
+              <span class="b-val color-spent" id="eventTotalSpent">Rs. 0</span>
+            </div>
+            <div class="budget-metric-card">
+              <span class="b-label">Remaining Balance</span>
+              <span class="b-val" id="eventRemainingBudget">Rs. 0</span>
+            </div>
+          </div>
+
+          <!-- Budget visual gauge -->
+          <div class="progress-bar-card">
+            <div class="progress-text-row">
+              <span class="progress-title">Budget Utilization</span>
+              <span class="progress-ratio" id="budgetUsagePercent">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill budget-fill" id="budgetProgressBar" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- Expense Table -->
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Expense Item</th>
+                  <th>Category</th>
+                  <th>Amount (LKR)</th>
+                  <th>Payment Status</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="expenseTableBody">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= TAB 4: DAY-OF TIMELINE ================= -->
+        <div id="tabTimeline" class="tab-pane">
+          <div class="pane-header">
+            <div class="pane-title-group">
+              <h2 class="pane-title">Day-of Run-of-Show (Nekath & Schedule)</h2>
+              <p class="pane-desc">Minute-by-minute rundown of auspicious timings, welcoming rituals, banquet, toasts, and baila dance.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="app.openAddTimelineModal()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              + Add Schedule Item
+            </button>
+          </div>
+
+          <div class="timeline-container" id="timelineContainer">
+            <!-- Timeline items rendered here -->
+          </div>
+        </div>
+
+        <!-- ================= TAB 5: VENDORS & CONTACTS ================= -->
+        <div id="tabVendors" class="tab-pane">
+          <div class="pane-header">
+            <div class="pane-title-group">
+              <h2 class="pane-title">Vendor & Crew Directory (Sri Lanka)</h2>
+              <p class="pane-desc">Direct phone and contact records for Poruwa artists, Magul Bera drummers, papare band, catering, and video crews.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="app.openAddVendorModal()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              + Add Vendor
+            </button>
+          </div>
+
+          <div class="vendors-grid" id="vendorsContainer">
+            <!-- Vendor cards rendered here -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- VIEW 3: CALENDAR VIEW                          -->
+    <!-- ============================================== -->
+    <section id="viewCalendar" class="app-view">
+      <div class="calendar-header-bar">
+        <div class="calendar-title-wrap">
+          <h2 class="subhead-title" id="calendarMonthYearTitle">November 2026</h2>
+        </div>
+        <div class="calendar-nav-buttons">
+          <button class="btn btn-secondary btn-sm" onclick="app.prevCalendarMonth()">◀ Previous</button>
+          <button class="btn btn-secondary btn-sm" onclick="app.todayCalendarMonth()">Today</button>
+          <button class="btn btn-secondary btn-sm" onclick="app.nextCalendarMonth()">Next ▶</button>
+        </div>
+      </div>
+
+      <div class="calendar-board">
+        <div class="calendar-weekdays">
+          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+        <div class="calendar-days-grid" id="calendarDaysGrid">
+          <!-- Days populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- VIEW 4: GLOBAL BUDGET ANALYTICS (LKR)         -->
+    <!-- ============================================== -->
+    <section id="viewBudgetGlobal" class="app-view">
+      <div class="pane-header">
+        <div class="pane-title-group">
+          <h2 class="pane-title">All Events Budget Summary (LKR - Rs.)</h2>
+          <p class="pane-desc">Portfolio-level financial overview across all planned events in Sri Lanka.</p>
+        </div>
+      </div>
+
+      <div class="global-budget-cards" id="globalBudgetCards">
+        <!-- Injected dynamically -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================== -->
+  <!-- MODALS                                         -->
+  <!-- ============================================== -->
+
+  <!-- Modal 1: Create / Edit Event -->
+  <div class="modal-backdrop" id="modalEvent" onclick="app.handleBackdropClick(event, 'modalEvent')">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalEventTitle">Add New Sri Lankan Event</h3>
+        <button class="modal-close" onclick="app.closeModal('modalEvent')">✕</button>
+      </div>
+      <form id="formEvent" onsubmit="app.saveEvent(event)">
+        <input type="hidden" id="eventFormId">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Event Title *</label>
+            <input type="text" id="eventFormTitle" class="form-input" placeholder="e.g. Kasun & Dinithi's Poruwa Ceremony" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Event Category *</label>
+              <select id="eventFormCategory" class="form-input" required>
+                <!-- Populated from CATEGORIES -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">District in Sri Lanka *</label>
+              <select id="eventFormDistrict" class="form-input" required>
+                <!-- Populated from SRI_LANKA_DISTRICTS -->
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Event Date *</label>
+              <input type="date" id="eventFormDate" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Time / Auspicious Nekatha</label>
+              <input type="time" id="eventFormTime" class="form-input" value="09:30">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Venue / Hotel Location *</label>
+            <input type="text" id="eventFormVenue" class="form-input" placeholder="e.g. Shangri-La Colombo, Grand Ballroom" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Client Name</label>
+              <input type="text" id="eventFormClientName" class="form-input" placeholder="e.g. Kasun Bandara">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Client Phone (LK)</label>
+              <input type="text" id="eventFormClientPhone" class="form-input" placeholder="e.g. +94 77 123 4567">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Estimated Budget (Rs. LKR) *</label>
+              <input type="number" id="eventFormBudget" class="form-input" min="0" step="10000" placeholder="1500000" value="2500000">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select id="eventFormStatus" class="form-input">
+                <option value="In Progress">In Progress</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description & Astrological / Ritual Notes</label>
+            <textarea id="eventFormDesc" class="form-textarea" rows="3" placeholder="Poruwa theme, Nekath auspicious times, catering preferences, special requests..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalEvent')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Add Task -->
+  <div class="modal-backdrop" id="modalTask" onclick="app.handleBackdropClick(event, 'modalTask')">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Task / Ritual Item</h3>
+        <button class="modal-close" onclick="app.closeModal('modalTask')">✕</button>
+      </div>
+      <form id="formTask" onsubmit="app.saveTask(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Task Title *</label>
+            <input type="text" id="taskFormTitle" class="form-input" placeholder="e.g. Confirm Magul Bera drummers & Ashtaka" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <input type="text" id="taskFormCategory" class="form-input" placeholder="Tradition, Decor, Catering, Music...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Priority</label>
+              <select id="taskFormPriority" class="form-input">
+                <option value="High">High Priority</option>
+                <option value="Medium" selected>Medium Priority</option>
+                <option value="Low">Low Priority</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Due Date</label>
+            <input type="date" id="taskFormDueDate" class="form-input">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalTask')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Add Guest -->
+  <div class="modal-backdrop" id="modalGuest" onclick="app.handleBackdropClick(event, 'modalGuest')">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Guest to List</h3>
+        <button class="modal-close" onclick="app.closeModal('modalGuest')">✕</button>
+      </div>
+      <form id="formGuest" onsubmit="app.saveGuest(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Guest Full Name *</label>
+            <input type="text" id="guestFormName" class="form-input" placeholder="e.g. Deshabandu Nihal Senanayake" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Phone / Email</label>
+              <input type="text" id="guestFormEmail" class="form-input" placeholder="+94 77 123 4567 or email">
+            </div>
+            <div class="form-group">
+              <label class="form-label">RSVP Status</label>
+              <select id="guestFormStatus" class="form-input">
+                <option value="Attending">Attending</option>
+                <option value="Awaiting" selected>Awaiting Reply</option>
+                <option value="Declined">Declined</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Plus Ones (+1 Count)</label>
+              <input type="number" id="guestFormPlusOnes" class="form-input" min="0" max="10" value="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Dietary Preference</label>
+              <select id="guestFormDiet" class="form-input">
+                <option value="Non-Veg">Non-Veg (Standard)</option>
+                <option value="Pure Veg">Pure Vegetarian</option>
+                <option value="Halal">Halal</option>
+                <option value="Seafood Only">Seafood Only</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Table Number & Special Notes</label>
+            <input type="text" id="guestFormNotes" class="form-input" placeholder="e.g. VIP Head Table 1, Traveling from Kandy">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalGuest')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Guest</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: Add Expense -->
+  <div class="modal-backdrop" id="modalExpense" onclick="app.handleBackdropClick(event, 'modalExpense')">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Record Expense (LKR)</h3>
+        <button class="modal-close" onclick="app.closeModal('modalExpense')">✕</button>
+      </div>
+      <form id="formExpense" onsubmit="app.saveExpense(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Expense Description *</label>
+            <input type="text" id="expenseFormTitle" class="form-input" placeholder="e.g. Gokkola Poruwa Structure Advance" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select id="expenseFormCategory" class="form-input">
+                <option value="Venue">Venue & Hotel Booking</option>
+                <option value="Decor">Poruwa & Floral Decor</option>
+                <option value="Catering">Banquet & Catering</option>
+                <option value="Tradition">Magul Bera & Traditional Rituals</option>
+                <option value="Entertainment">Papare Band & DJ</option>
+                <option value="Media">Photography & Drone Video</option>
+                <option value="Other">Other / Misc</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Amount in Rs. (LKR) *</label>
+              <input type="number" id="expenseFormAmount" class="form-input" min="0" step="500" placeholder="150000" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Status</label>
+            <select id="expenseFormStatus" class="form-input">
+              <option value="Paid">Paid</option>
+              <option value="Pending" selected>Pending</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalExpense')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Record Expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 5: Add Schedule Item -->
+  <div class="modal-backdrop" id="modalTimeline" onclick="app.handleBackdropClick(event, 'modalTimeline')">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Schedule / Nekath Item</h3>
+        <button class="modal-close" onclick="app.closeModal('modalTimeline')">✕</button>
+      </div>
+      <form id="formTimeline" onsubmit="app.saveTimeline(event)">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Time *</label>
+              <input type="time" id="timelineFormTime" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Activity / Ritual Title *</label>
+              <input type="text" id="timelineFormTitle" class="form-input" placeholder="e.g. Auspicious Poruwa Ascent (Nekatha)" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes & Ritual Details</label>
+            <textarea id="timelineFormDesc" class="form-textarea" rows="2" placeholder="e.g. Ashtaka chanting, Jayamangala Gatha, brass oil lamp lighting"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalTimeline')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add to Schedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 6: Add Vendor -->
+  <div class="modal-backdrop" id="modalVendor" onclick="app.handleBackdropClick(event, 'modalVendor')">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Sri Lankan Vendor / Contact</h3>
+        <button class="modal-close" onclick="app.closeModal('modalVendor')">✕</button>
+      </div>
+      <form id="formVendor" onsubmit="app.saveVendor(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Vendor / Crew Name *</label>
+            <input type="text" id="vendorFormName" class="form-input" placeholder="e.g. Ravana Beats Magul Bera Troupe" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Service Provided</label>
+              <input type="text" id="vendorFormService" class="form-input" placeholder="e.g. Magul Bera, Poruwa Decor, Papare, Photo" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirmation Status</label>
+              <select id="vendorFormStatus" class="form-input">
+                <option value="Confirmed" selected>Confirmed</option>
+                <option value="Advance Paid">Advance Paid</option>
+                <option value="Pending Quote">Pending Quote</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Number / Location</label>
+            <input type="text" id="vendorFormContact" class="form-input" placeholder="e.g. +94 77 123 4567 | Colombo 03">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalVendor')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Vendor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 7: Confirm Delete -->
+  <div class="modal-backdrop" id="modalConfirm" onclick="app.handleBackdropClick(event, 'modalConfirm')">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">Confirm Deletion</h3>
+        <button class="modal-close" onclick="app.closeModal('modalConfirm')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmModalText">Are you sure you want to delete this event? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalConfirm')">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmModalActionBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 8: Planner Profile & Workspace Settings -->
+  <div class="modal-backdrop" id="modalProfile" onclick="app.handleBackdropClick(event, 'modalProfile')">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">My Planner Profile & Settings ⚙️</h3>
+        <button class="modal-close" onclick="app.closeModal('modalProfile')">✕</button>
+      </div>
+      <form id="formProfile" onsubmit="app.saveProfile(event)">
+        <div class="modal-body">
+          <div class="profile-modal-intro">
+            <div class="profile-avatar-large" id="profileLargeAvatar">LK</div>
+            <div>
+              <h4 style="font-size: 1.05rem; font-weight: 700;">Personal Event Planner Details</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted);">Your information is securely saved in your browser and stamped on event briefs and printouts.</p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Planner Full Name *</label>
+              <input type="text" id="profileFormName" class="form-input" placeholder="e.g. Kasun Perera" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Agency / Business Name</label>
+              <input type="text" id="profileFormCompany" class="form-input" placeholder="e.g. Ceylon Vibe Events & Weddings">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Phone / WhatsApp *</label>
+              <input type="text" id="profileFormPhone" class="form-input" placeholder="e.g. +94 77 123 4567" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" id="profileFormEmail" class="form-input" placeholder="e.g. kasun@ceylonvibe.lk">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Base District</label>
+              <select id="profileFormDistrict" class="form-input">
+                <!-- Filled from SRI_LANKA_DISTRICTS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Currency Symbol</label>
+              <input type="text" id="profileFormCurrency" class="form-input" value="Rs." readonly>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tagline / Specialization</label>
+            <input type="text" id="profileFormTagline" class="form-input" placeholder="e.g. Specialist in Luxury Poruwa Ceremonies & Galas">
+          </div>
+
+          <hr style="border: none; border-top: 1px solid var(--border-color); margin: 0.5rem 0;">
+
+          <!-- Data Ownership & Backup Section -->
+          <div class="data-tools-section">
+            <label class="form-label" style="font-weight: 700; color: var(--text-main);">Data Backup & Device Transfer</label>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">Download a backup file of all your events, guests, tasks, and budgets, or restore them onto another device.</p>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="app.exportAllData()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download Backup (JSON)
+              </button>
+              
+              <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('importFileInput').click()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                Restore from Backup
+              </button>
+
+              <button type="button" class="btn btn-danger-soft btn-sm" onclick="app.clearWorkspaceToBlank()">
+                Start Blank Slate (Clear All)
+              </button>
+            </div>
+            <input type="file" id="importFileInput" style="display: none;" accept=".json" onchange="app.importAllData(event)">
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalProfile')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save My Details</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
